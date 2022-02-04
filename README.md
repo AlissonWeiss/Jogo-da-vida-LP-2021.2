@@ -15,8 +15,8 @@
  * Se uma célula zumbi não possui células vivas adjacentes (horizontal, vertical ou diagonal), ela estará morta na próxima iteração. (inanição)
 
  Restrições
- (i) O programa deve ser desenvolvido puramente através de instruções funcionais na linguagem Haskell.
- (ii) A entrega deve constar de (a) arquivos fonte, [(b) Makefile ou (c) roteiro completo de compilação/execução] e (d) exemplos de uso para testes.
- (iii) O trabalho pode ser feito em grupos de até duas pessoas.
- (iv) Em caso de duplas, deve ser incluído na entrega uma (e) descrição da atuação de cada integrante.
- (v) Não necessariamente as notas da dupla serão iguais.
+ * (i) O programa deve ser desenvolvido puramente através de instruções funcionais na linguagem Haskell.
+ * (ii) A entrega deve constar de (a) arquivos fonte, [(b) Makefile ou (c) roteiro completo de compilação/execução] e (d) exemplos de uso para testes.
+ * (iii) O trabalho pode ser feito em grupos de até duas pessoas.
+ * (iv) Em caso de duplas, deve ser incluído na entrega uma (e) descrição da atuação de cada integrante.
+ * (v) Não necessariamente as notas da dupla serão iguais.
