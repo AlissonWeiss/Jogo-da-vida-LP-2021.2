@@ -2,7 +2,8 @@
 -- TYPES
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use foldr" #-}
-type Matrix = [[String]]
+type Matrix = [String]
+data Matrix2 = Matrix2 { content :: Matrix, contentData :: Matrix };
 data Result = Result { m :: Matrix, it :: Int }
 -- END TYPES
 
@@ -15,21 +16,12 @@ getResult (Result m _) = m
 -- END EXTRACTOR
 
 -- GAME LOGIC
-asd :: [String] -> [String]
-asd [] = []
-asd ("v" : "m" : "v" : xs) = "v" : "v" : "v" : asd xs
-asd (x : "v" : xs) = "m" : asd xs
-asd (x : "z" : xs) = "q" : asd xs
-asd (x : xs) = x : asd xs
-
-test :: Matrix -> Matrix
-test [] = []
-test (x : xs) = [asd x] ++ xs
-
-
 
 gamelogic :: Matrix -> Matrix
-gamelogic matrix = test matrix
+gamelogic [] = []
+gamelogic ("m" : "v" : "v" : "v" : xs) = "v" : "v" : "v" : "v" : xs
+gamelogic x = x
+
 -- END GAME LOGIC
 
 -- qwerty :: [String] -> String
@@ -59,36 +51,35 @@ gameloop begin end inputMatrix outputMatrix
 -- END GAME LOOP
 
 -- PRINT MATRIX
-matrix2str :: [String] -> String
-matrix2str [] = ""
-matrix2str (x : xs) = x ++ "|" ++ matrix2str xs
+matrix2str :: [String] -> Int -> Int -> String
+matrix2str [] _ _ = ""
+matrix2str (x : xs) index col = do
+    if index == col then
+        x ++ "|\n" ++ matrix2str xs 1 col
+    else    
+        x ++ "|" ++ matrix2str xs (index + 1) col
 -- END PRINT MATRIX
 
-
 -- GAME INSTANCE
--- m m v z 
--- z v m m
+-- m v z z
+-- v v m m
 -- z v m m
 main :: IO ()
 main = do    
-    let matrix = [["v", "m", "v", "z"],["z", "v", "m", "m"],["z", "v", "m", "m"]]
+    let matrix = ["m", "v", "z", "z", "v", "v", "m", "m", "z", "v", "m", "m"]
 
     let n = 5
 
-    let original = map matrix2str matrix
-    putStr "\nMatriz original:\n"
-    mapM_ putStrLn original
+    let original = matrix2str matrix 1 4
+    putStr "\nJogo Inicial:\n"
+    putStr original
 
-    -- print diagonal
-    -- let x = zipWith (!!) matrix [0..]
-    -- mapM_ putStr x
+    let finalMatrix = gameloop 1 n matrix []
 
-    let finalMatrix = gameloop 1 n matrix [[]]
-
-    putStr "Numero de iteracoes: "
+    putStr "\nNumero de iteracoes: "
     print $ getNumberOfIterations finalMatrix
 
     putStr "\nResultado do jogo:\n"
     
-    let body = map matrix2str $ getResult finalMatrix
-    mapM_ putStrLn body
+    let final = matrix2str (getResult finalMatrix) 1 4
+    putStr final
