@@ -1,3 +1,5 @@
+import Uteis
+
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 -- TYPES
@@ -12,29 +14,6 @@ getNumberOfIterations (Result _ it) = it
 getResult :: Result -> Matrix
 getResult (Result m _) = m
 -- END EXTRACTOR
-
--- CONVERTER
-strToInt :: String -> Int
-strToInt = read
-
-intToStr :: Int -> String
-intToStr = show
--- END CONVERTER
-
--- FILE FUNCTIONS
-readInputFile :: FilePath -> IO(Int, Int, Int, Matrix)
-readInputFile file = fmap(readLine . words) (readFile file)
-
-readLine :: [String] -> (Int, Int, Int, Matrix)
-readLine (iteracao : linhas : colunas : matriz) =
-    (i, l, c, m)
-    where
-        i = strToInt iteracao
-        l = strToInt linhas
-        c = strToInt colunas
-        m = matriz
-
--- END FILE FUNCTIONS
 
 checksum :: (Num a1, Num a2, Num a3) => Matrix -> Int -> Int -> [[Int]] -> (a2, a1, a3) -> (a2, a1, a3)
 checksum inputMatrix linhas colunas [] (a,b,c) = (a,b,c)
@@ -55,11 +34,7 @@ collection :: (Num a1, Num a2, Num a3) => Matrix -> Int -> Int -> Int -> (a2, a1
 collection inputMatriz lines column index = do
     checksum inputMatriz lines column (neighbors (div index column) (mod index column)) (0,0,0)
 
--- TODO ^
-
 -- utils:
-index :: Int -> Matrix -> [Char]
-index i matrix = head(drop i matrix)
 alives :: (a, b, c) -> a
 alives (alive, _, _) = alive
 deads :: (a, b, c) -> b
@@ -70,12 +45,12 @@ zombies (_, _, zombie) = zombie
 -- evaluate current cell
 eval :: Matrix -> Int -> Int -> Int -> [Char]
 eval inputMatrix lines columns inter
-   | index inter inputMatrix == "m" && alive == 3 = "v"
-   | index inter inputMatrix == "v" && zombie >= 2 = "z"
-   | index inter inputMatrix == "v" && alive < 2 && zombie < 2  = "m"
-   | index inter inputMatrix == "v" && alive > 3 && zombie == 0 = "m"
-   | index inter inputMatrix == "z" && alive == 0 = "m"
-   | otherwise = index inter inputMatrix
+   | Uteis.index inter inputMatrix == "m" && alive == 3 = "v"
+   | Uteis.index inter inputMatrix == "v" && zombie >= 2 = "z"
+   | Uteis.index inter inputMatrix == "v" && alive < 2 && zombie < 2  = "m"
+   | Uteis.index inter inputMatrix == "v" && alive > 3 && zombie == 0 = "m"
+   | Uteis.index inter inputMatrix == "z" && alive == 0 = "m"
+   | otherwise = Uteis.index inter inputMatrix
    where alive  = alives  (collection inputMatrix lines columns inter)
          zombie = zombies (collection inputMatrix lines columns inter)
          dead   = deads   (collection inputMatrix lines columns inter)
@@ -88,17 +63,12 @@ gamelogic inputMatrix outputMatrix linhas colunas inter =
    where partialMatrix = eval inputMatrix linhas colunas inter : outputMatrix
 -- END GAME LOGIC
 
--- COMPARE
-compareMatrix :: Matrix -> Matrix -> Bool
-compareMatrix m1 m2 = m1 == m2
--- END COMPARE
-
 -- GAME LOOP
 gameloop :: Int -> Int -> Matrix -> Int -> Int -> Result
 gameloop begin end inputMatrix linhas colunas
     | begin == end = Result inputMatrix begin
     | begin < end = do
-        if inputMatrix == logic then
+        if compareMatrix inputMatrix logic then
             Result logic begin
         else
             gameloop (begin + 1) end logic linhas colunas
@@ -108,23 +78,13 @@ gameloop begin end inputMatrix linhas colunas
 
 -- END GAME LOOP
 
--- PRINT MATRIX
-matrix2str :: [String] -> Int -> Int -> String
-matrix2str [] _ _ = ""
-matrix2str (x : xs) index col = do
-    if index == col then
-        x ++ "|\n" ++ matrix2str xs 1 col
-    else
-        x ++ "|" ++ matrix2str xs (index + 1) col
--- END PRINT MATRIX
-
 -- TESTES
 
 testExecution:: Int -> String -> IO ()
 testExecution nTeste fileName = do
 
     putStrLn ("\nTeste " ++ intToStr nTeste ++ "\n") 
-    (iteracao, linhas, colunas, matriz) <- readInputFile fileName -- Lê os dados do arquivo
+    (iteracao, linhas, colunas, matriz) <- Uteis.readInputFile fileName -- Lê os dados do arquivo
     putStrLn ("Iterações: " ++ intToStr iteracao)
     putStrLn ("Linhas   : " ++ intToStr linhas)
     putStrLn ("Colunas  : " ++ intToStr colunas)
