@@ -39,13 +39,13 @@ readLine (iteracao : linhas : colunas : matriz) =
 
 -- TODO v
 
-count n linhas colunas [] (a,b,c) = (a,b,c)
-count n linhas colunas indexes (a,b,c)
-    | i < 0 || j < 0 = count n linhas colunas body (a, b, c)
-    | i >= linhas || j >= colunas = count n linhas colunas body (a, b, c)
-    | n!!index == "m" = count n linhas colunas body (a, b + 1, c)
-    | n!!index == "v" = count n linhas colunas body (a + 1, b, c)
-    | n!!index == "z" = count n linhas colunas body (a, b, c + 1)
+count matriz linhas colunas [] (a,b,c) = (a,b,c)
+count matriz linhas colunas indexes (a,b,c)
+    | i < 0 || j < 0 = count matriz linhas colunas body (a, b, c)
+    | i >= linhas || j >= colunas = count matriz linhas colunas body (a, b, c)
+    | matriz!!index == "m" = count matriz linhas colunas body (a, b + 1, c)
+    | matriz!!index == "v" = count matriz linhas colunas body (a + 1, b, c)
+    | matriz!!index == "z" = count matriz linhas colunas body (a, b, c + 1)
     where body = tail indexes
           i = head indexes !! 0
           j = head indexes !! 1
@@ -87,7 +87,7 @@ eval inputMatrix lines columns inter
 -- GAME LOGIC
 gamelogic :: Matrix -> Matrix -> Int -> Int -> Int -> Matrix
 gamelogic inputMatrix outputMatrix linhas colunas inter =
-   if inter >= linhas * colunas then  outputMatrix
+   if inter >= linhas * colunas then outputMatrix
    else gamelogic inputMatrix partialMatrix linhas colunas (inter + 1)
    where partialMatrix = eval inputMatrix linhas colunas inter : outputMatrix
 -- gamelogic ("m" : "v" : "v" : "v" : xs) = "v" : "v" : "v" : "v" : xs
@@ -109,9 +109,9 @@ gameloop begin end inputMatrix outputMatrix linhas colunas
             Result outputMatrix begin
         else
             gameloop (begin + 1) end inputMatrix logic linhas colunas
-    | otherwise = Result outputMatrix begin
+    | otherwise = Result inputMatrix begin
     where
-        logic = gamelogic inputMatrix outputMatrix linhas colunas 0
+        logic = reverse(gamelogic inputMatrix [] linhas colunas 0)
 
 -- END GAME LOOP
 
@@ -131,14 +131,14 @@ main = do
 
     -- Inicio teste 1
     putStrLn "\nTeste 1.\n"
-    (iteracao_t1, linhas_t1, colunas_t1, matriz_t1) <- readInputFile "teste_1.txt" -- Lê os dados do arquivo
+    (iteracao_t1, linhas_t1, colunas_t1, matriz_t1) <- readInputFile "teste_6.txt" -- Lê os dados do arquivo
     putStrLn ("Iterações: " ++ intToStr iteracao_t1)
     putStrLn ("Linhas: " ++ intToStr linhas_t1)
     putStrLn ("Colunas: " ++ intToStr colunas_t1)
     let matriz_t1_str = matrix2str matriz_t1 1 colunas_t1
     putStrLn ("\nMatriz inicial\n" ++ matriz_t1_str)
 
-    let gameResult_t1 = gameloop 1 iteracao_t1 matriz_t1 [] linhas_t1 colunas_t1
+    let gameResult_t1 = gameloop 0 iteracao_t1 matriz_t1 [] linhas_t1 colunas_t1
     let iteracoes_gastas_t1 = getNumberOfIterations gameResult_t1
     putStrLn ("Número de iterações gastas: " ++ intToStr iteracoes_gastas_t1)
 

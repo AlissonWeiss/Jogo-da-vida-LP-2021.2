@@ -1,6 +1,6 @@
 2
 3
-4
-v m v v
-z v m m
-v m m z
+3
+m v m
+v v m
+m m m
