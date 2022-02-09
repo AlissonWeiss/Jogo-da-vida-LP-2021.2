@@ -1,3 +1,4 @@
+
 -- TYPES
 type Matrix = [String]
 data Result = Result { m :: Matrix, it :: Int }
@@ -36,14 +37,61 @@ readLine (iteracao : linhas : colunas : matriz) =
         c = strToInt colunas
         m = matriz
 
+-- TODO v
+
+count n linhas colunas [] (a,b,c) = (a,b,c)
+count n linhas colunas indexes (a,b,c)
+    | i < 0 || j < 0 = count n linhas colunas body (a, b, c)
+    | i >= linhas || j >= colunas = count n linhas colunas body (a, b, c)
+    | n!!index == "m" = count n linhas colunas body (a, b + 1, c)
+    | n!!index == "v" = count n linhas colunas body (a + 1, b, c)
+    | n!!index == "z" = count n linhas colunas body (a, b, c + 1)
+    where body = tail indexes
+          i = head indexes !! 0
+          j = head indexes !! 1
+          index = i * colunas + j
+
+-- neighbors :: Num a => a -> a -> [[a]]
+neighbors i j = [[i-1,j+1], [i,j+1], [i+1,j+1],[i-1,j], [i+1,j],[i-1,j-1],[i, j-1], [i+1,j-1]]
+
+-- adz :: t1 -> t2 -> a -> a -> t3
+adz n linhas colunas i = count n linhas colunas (neighbors (div i colunas) (mod i colunas)) (0,0,0)
+
+-- TODO ^
+
+-- utils:
+index :: Int -> Matrix -> [Char]
+index i matrix = head(drop i matrix)
+alives :: (a, b, c) -> a
+alives (alive, _, _) = alive
+deads :: (a, b, c) -> b
+deads (_, dead, _) = dead
+zombies :: (a, b, c) -> c
+zombies (_, _, zombie) = zombie
+
 -- END FILE FUNCTIONS
+eval :: Matrix -> Int -> Int -> Int -> [Char]
+eval inputMatrix lines columns inter
+   | index inter inputMatrix == "m" && alive == 3 = "v"
+   | index inter inputMatrix == "v" && zombie >= 2 = "z"
+   | index inter inputMatrix == "v" && alive < 2 && zombie < 2  = "m"
+   | index inter inputMatrix == "v" && alive > 3 && zombie == 0 = "m"
+   | index inter inputMatrix == "z" && alive == 0 = "m"
+   | otherwise = index inter inputMatrix
+   where alive  = alives (adz inputMatrix lines columns inter)
+         zombie = zombies (adz inputMatrix lines columns inter)
+         dead   = deads (adz inputMatrix lines columns inter)
+
+
 
 -- GAME LOGIC
-
-gamelogic :: Matrix -> Matrix
-gamelogic [] = []
-gamelogic ("m" : "v" : "v" : "v" : xs) = "v" : "v" : "v" : "v" : xs
-gamelogic x = x
+gamelogic :: Matrix -> Matrix -> Int -> Int -> Int -> Matrix
+gamelogic inputMatrix outputMatrix linhas colunas inter =
+   if inter >= linhas * colunas then  outputMatrix
+   else gamelogic inputMatrix partialMatrix linhas colunas (inter + 1)
+   where partialMatrix = eval inputMatrix linhas colunas inter : outputMatrix
+-- gamelogic ("m" : "v" : "v" : "v" : xs) = "v" : "v" : "v" : "v" : xs
+-- gamelogic x = x
 
 -- END GAME LOGIC
 
@@ -53,15 +101,17 @@ compareMatrix m1 m2 = m1 == m2
 -- END COMPARE
 
 -- GAME LOOP
-gameloop :: Int -> Int -> Matrix -> Matrix -> Result
-gameloop begin end inputMatrix outputMatrix
+gameloop :: Int -> Int -> Matrix -> Matrix -> Int -> Int -> Result
+gameloop begin end inputMatrix outputMatrix linhas colunas
     | begin == end = Result outputMatrix begin
     | begin < end = do
         if compareMatrix inputMatrix outputMatrix then
             Result outputMatrix begin
         else
-            gameloop (begin + 1) end inputMatrix $ gamelogic inputMatrix
+            gameloop (begin + 1) end inputMatrix logic linhas colunas
     | otherwise = Result outputMatrix begin
+    where
+        logic = gamelogic inputMatrix outputMatrix linhas colunas 0
 
 -- END GAME LOOP
 
@@ -81,14 +131,14 @@ main = do
 
     -- Inicio teste 1
     putStrLn "\nTeste 1.\n"
-    (iteracao_t1, linhas_t1, colunas_t1, matriz_t1) <- readInputFile "teste_1.txt" -- Lê os dados do arquivo 
+    (iteracao_t1, linhas_t1, colunas_t1, matriz_t1) <- readInputFile "teste_1.txt" -- Lê os dados do arquivo
     putStrLn ("Iterações: " ++ intToStr iteracao_t1)
     putStrLn ("Linhas: " ++ intToStr linhas_t1)
     putStrLn ("Colunas: " ++ intToStr colunas_t1)
     let matriz_t1_str = matrix2str matriz_t1 1 colunas_t1
     putStrLn ("\nMatriz inicial\n" ++ matriz_t1_str)
 
-    let gameResult_t1 = gameloop 1 iteracao_t1 matriz_t1 []
+    let gameResult_t1 = gameloop 1 iteracao_t1 matriz_t1 [] linhas_t1 colunas_t1
     let iteracoes_gastas_t1 = getNumberOfIterations gameResult_t1
     putStrLn ("Número de iterações gastas: " ++ intToStr iteracoes_gastas_t1)
 
