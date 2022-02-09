@@ -125,27 +125,59 @@ matrix2str (x : xs) index col = do
         x ++ "|" ++ matrix2str xs (index + 1) col
 -- END PRINT MATRIX
 
+-- TESTES
+
+testExecution:: Int -> String -> IO ()
+testExecution nTeste fileName = do
+
+    putStrLn ("\nTeste " ++ intToStr nTeste ++ "\n") 
+    (iteracao, linhas, colunas, matriz) <- readInputFile fileName -- Lê os dados do arquivo
+    putStrLn ("Iterações: " ++ intToStr iteracao)
+    putStrLn ("Linhas   : " ++ intToStr linhas)
+    putStrLn ("Colunas  : " ++ intToStr colunas)
+    let matriz_str = matrix2str matriz 1 colunas
+    putStrLn ("\nMatriz inicial\n" ++ matriz_str)
+
+    let gameResult = gameloop 0 iteracao matriz linhas colunas
+    let iteracoes_gastas = getNumberOfIterations gameResult
+    putStrLn ("Número de iterações gastas: " ++ intToStr iteracoes_gastas)
+
+    putStr "\nResultado do jogo:\n"
+
+    let final_matriz_t1 = matrix2str (getResult gameResult) 1 colunas
+    putStr final_matriz_t1
+
+    putStrLn ("\nFim Teste " ++ intToStr nTeste ++ "\n")
+    putStrLn "-------------------------------------------"
+
+
+-- END TESTES
+
 -- GAME INSTANCE
 main :: IO ()
 main = do
 
     -- Inicio teste 1
-    putStrLn "\nTeste 1.\n"
-    (iteracao_t1, linhas_t1, colunas_t1, matriz_t1) <- readInputFile "teste_6.txt" -- Lê os dados do arquivo
-    putStrLn ("Iterações: " ++ intToStr iteracao_t1)
-    putStrLn ("Linhas: " ++ intToStr linhas_t1)
-    putStrLn ("Colunas: " ++ intToStr colunas_t1)
-    let matriz_t1_str = matrix2str matriz_t1 1 colunas_t1
-    putStrLn ("\nMatriz inicial\n" ++ matriz_t1_str)
-
-    let gameResult_t1 = gameloop 0 iteracao_t1 matriz_t1 linhas_t1 colunas_t1
-    let iteracoes_gastas_t1 = getNumberOfIterations gameResult_t1
-    putStrLn ("Número de iterações gastas: " ++ intToStr iteracoes_gastas_t1)
-
-    putStr "\nResultado do jogo:\n"
-
-    let final_matriz_t1 = matrix2str (getResult gameResult_t1) 1 colunas_t1
-    putStr final_matriz_t1
-
-    putStrLn "\nFim Teste 1.\n"
+    testExecution 1 "teste_1.txt"
     -- Fim teste 1
+    
+    -- Inicio teste 2
+    testExecution 2 "teste_2.txt"
+    -- Fim teste 2
+    
+    -- Inicio teste 3
+    testExecution 3 "teste_3.txt"
+    -- Fim teste 3
+    
+    -- Inicio teste 4
+    testExecution 4 "teste_4.txt"
+    -- Fim teste 4
+    
+    -- Inicio teste 5
+    testExecution 5 "teste_5.txt"
+    -- Fim teste 5
+    
+    -- Inicio teste 6
+    testExecution 6 "teste_6.txt"
+    -- Fim teste 6
+    
