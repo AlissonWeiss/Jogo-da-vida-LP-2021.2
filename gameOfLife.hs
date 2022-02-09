@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 -- TYPES
 type Matrix = [String]
@@ -13,21 +14,17 @@ getResult (Result m _) = m
 -- END EXTRACTOR
 
 -- CONVERTER
-
 strToInt :: String -> Int
 strToInt = read
 
 intToStr :: Int -> String
 intToStr = show
-
 -- END CONVERTER
 
 -- FILE FUNCTIONS
-
 readInputFile :: FilePath -> IO(Int, Int, Int, Matrix)
 readInputFile file = fmap(readLine . words) (readFile file)
 
---readLine :: [String] -> (Int, Int, Int, [String])
 readLine :: [String] -> (Int, Int, Int, Matrix)
 readLine (iteracao : linhas : colunas : matriz) =
     (i, l, c, m)
@@ -37,25 +34,26 @@ readLine (iteracao : linhas : colunas : matriz) =
         c = strToInt colunas
         m = matriz
 
--- TODO v
+-- END FILE FUNCTIONS
 
-count matriz linhas colunas [] (a,b,c) = (a,b,c)
-count matriz linhas colunas indexes (a,b,c)
-    | i < 0 || j < 0 = count matriz linhas colunas body (a, b, c)
-    | i >= linhas || j >= colunas = count matriz linhas colunas body (a, b, c)
-    | matriz!!index == "m" = count matriz linhas colunas body (a, b + 1, c)
-    | matriz!!index == "v" = count matriz linhas colunas body (a + 1, b, c)
-    | matriz!!index == "z" = count matriz linhas colunas body (a, b, c + 1)
-    where body = tail indexes
-          i = head indexes !! 0
-          j = head indexes !! 1
+checksum :: (Num a1, Num a2, Num a3) => Matrix -> Int -> Int -> [[Int]] -> (a2, a1, a3) -> (a2, a1, a3)
+checksum inputMatrix linhas colunas [] (a,b,c) = (a,b,c)
+checksum inputMatrix linhas colunas neighbors (a,b,c)
+    | i < 0 || j < 0 || i >= linhas || j >= colunas = checksum inputMatrix linhas colunas body (a, b, c)
+    | inputMatrix!!index == "m" = checksum inputMatrix linhas colunas body (a, b + 1, c)
+    | inputMatrix!!index == "v" = checksum inputMatrix linhas colunas body (a + 1, b, c)
+    | inputMatrix!!index == "z" = checksum inputMatrix linhas colunas body (a, b, c + 1)
+    where body = tail neighbors
+          i = head (head neighbors)
+          j = head neighbors !! 1
           index = i * colunas + j
 
--- neighbors :: Num a => a -> a -> [[a]]
-neighbors i j = [[i-1,j+1], [i,j+1], [i+1,j+1],[i-1,j], [i+1,j],[i-1,j-1],[i, j-1], [i+1,j-1]]
+neighbors :: Int -> Int -> [[Int]]
+neighbors i j = [[i-1,j+1], [i,j+1], [i+1,j+1], [i-1,j], [i+1,j], [i-1,j-1], [i, j-1], [i+1,j-1]]
 
--- adz :: t1 -> t2 -> a -> a -> t3
-adz n linhas colunas i = count n linhas colunas (neighbors (div i colunas) (mod i colunas)) (0,0,0)
+collection :: (Num a1, Num a2, Num a3) => Matrix -> Int -> Int -> Int -> (a2, a1, a3)
+collection inputMatriz lines column index = do
+    checksum inputMatriz lines column (neighbors (div index column) (mod index column)) (0,0,0)
 
 -- TODO ^
 
@@ -69,7 +67,7 @@ deads (_, dead, _) = dead
 zombies :: (a, b, c) -> c
 zombies (_, _, zombie) = zombie
 
--- END FILE FUNCTIONS
+-- evaluate current cell
 eval :: Matrix -> Int -> Int -> Int -> [Char]
 eval inputMatrix lines columns inter
    | index inter inputMatrix == "m" && alive == 3 = "v"
@@ -78,11 +76,9 @@ eval inputMatrix lines columns inter
    | index inter inputMatrix == "v" && alive > 3 && zombie == 0 = "m"
    | index inter inputMatrix == "z" && alive == 0 = "m"
    | otherwise = index inter inputMatrix
-   where alive  = alives (adz inputMatrix lines columns inter)
-         zombie = zombies (adz inputMatrix lines columns inter)
-         dead   = deads (adz inputMatrix lines columns inter)
-
-
+   where alive  = alives  (collection inputMatrix lines columns inter)
+         zombie = zombies (collection inputMatrix lines columns inter)
+         dead   = deads   (collection inputMatrix lines columns inter)
 
 -- GAME LOGIC
 gamelogic :: Matrix -> Matrix -> Int -> Int -> Int -> Matrix
@@ -90,9 +86,6 @@ gamelogic inputMatrix outputMatrix linhas colunas inter =
    if inter >= linhas * colunas then outputMatrix
    else gamelogic inputMatrix partialMatrix linhas colunas (inter + 1)
    where partialMatrix = eval inputMatrix linhas colunas inter : outputMatrix
--- gamelogic ("m" : "v" : "v" : "v" : xs) = "v" : "v" : "v" : "v" : xs
--- gamelogic x = x
-
 -- END GAME LOGIC
 
 -- COMPARE
