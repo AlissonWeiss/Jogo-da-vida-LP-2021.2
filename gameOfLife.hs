@@ -101,14 +101,14 @@ compareMatrix m1 m2 = m1 == m2
 -- END COMPARE
 
 -- GAME LOOP
-gameloop :: Int -> Int -> Matrix -> Matrix -> Int -> Int -> Result
-gameloop begin end inputMatrix outputMatrix linhas colunas
-    | begin == end = Result outputMatrix begin
+gameloop :: Int -> Int -> Matrix -> Int -> Int -> Result
+gameloop begin end inputMatrix linhas colunas
+    | begin == end = Result inputMatrix begin
     | begin < end = do
-        if compareMatrix inputMatrix outputMatrix then
-            Result outputMatrix begin
+        if inputMatrix == logic then
+            Result logic begin
         else
-            gameloop (begin + 1) end inputMatrix logic linhas colunas
+            gameloop (begin + 1) end logic linhas colunas
     | otherwise = Result inputMatrix begin
     where
         logic = reverse(gamelogic inputMatrix [] linhas colunas 0)
@@ -138,7 +138,7 @@ main = do
     let matriz_t1_str = matrix2str matriz_t1 1 colunas_t1
     putStrLn ("\nMatriz inicial\n" ++ matriz_t1_str)
 
-    let gameResult_t1 = gameloop 0 iteracao_t1 matriz_t1 [] linhas_t1 colunas_t1
+    let gameResult_t1 = gameloop 0 iteracao_t1 matriz_t1 linhas_t1 colunas_t1
     let iteracoes_gastas_t1 = getNumberOfIterations gameResult_t1
     putStrLn ("Número de iterações gastas: " ++ intToStr iteracoes_gastas_t1)
 
